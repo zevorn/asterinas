@@ -62,6 +62,18 @@ kernel_bin_name() {
     echo "${package_name}-osdk-bin"
 }
 
+ensure_osdk() {
+    if command -v cargo-osdk >/dev/null 2>&1; then
+        return
+    fi
+
+    echo "[metrics] Installing cargo-osdk"
+    (
+        cd "$PROJECT_ROOT"
+        OSDK_LOCAL_DEV=1 cargo install cargo-osdk --path osdk
+    )
+}
+
 main() {
     local arch="${TARGET_ARCH:-x86_64}"
     local target
@@ -70,6 +82,7 @@ main() {
     target="$(target_triple "$arch")"
     mkdir -p "$OUTPUT_DIR"
     rm -f "$SOCKET_PATH"
+    ensure_osdk
 
     echo "[metrics] Starting kernel with GDB server"
     (
