@@ -79,7 +79,7 @@ main() {
     QEMU_PID=$!
 
     echo "[metrics] Waiting for GDB socket"
-    for _ in $(seq 1 300); do
+    for _ in $(seq 1 900); do
         [ -S "$SOCKET_PATH" ] && break
         sleep 1
     done
