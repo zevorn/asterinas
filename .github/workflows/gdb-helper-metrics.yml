@@ -1,0 +1,28 @@
+name: GDB helper metrics
+
+on:
+  push:
+    branches:
+      - experiment/gdb-helper-metrics
+  workflow_dispatch:
+
+jobs:
+  collect:
+    runs-on: ubuntu-4-cores-150GB-ssd
+    container:
+      image: asterinas/kernel-dev:0.19.0-20261012
+      options: -v /dev:/dev --privileged
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Collect GDB output
+        run: bash experiments/gdb-helper-metrics/run_metrics.sh
+      - name: Analyze GDB output
+        run: |
+          python3 -m pip install --quiet --break-system-packages tiktoken
+          python3 experiments/gdb-helper-metrics/analyze.py
+      - name: Upload metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: gdb-helper-metrics
+          path: experiments/gdb-helper-metrics/output/
