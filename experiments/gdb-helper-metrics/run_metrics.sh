@@ -84,6 +84,9 @@ main() {
     rm -f "$SOCKET_PATH"
     ensure_osdk
 
+    echo "[metrics] Building initramfs images"
+    make -C "$PROJECT_ROOT" initramfs
+
     echo "[metrics] Starting kernel with GDB server"
     (
         cd "$PROJECT_ROOT"
@@ -106,7 +109,7 @@ main() {
     fi
 
     echo "[metrics] Kernel ELF: $elf"
-    timeout 600 rust-gdb --batch \
+    timeout 900 rust-gdb --batch \
         --command="$SCRIPT_DIR/collect.gdb" \
         "$elf" > "$OUTPUT_DIR/gdb.log" 2>&1 || true
 
