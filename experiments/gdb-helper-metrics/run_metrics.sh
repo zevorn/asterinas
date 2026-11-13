@@ -90,7 +90,9 @@ main() {
     echo "[metrics] Starting kernel with GDB server"
     (
         cd "$PROJECT_ROOT"
-        setsid cargo osdk run --gdb-server wait-client
+        setsid cargo osdk run \
+            --initramfs="$PROJECT_ROOT/test/initramfs/build/initramfs.cpio.gz" \
+            --gdb-server wait-client
     ) &
     QEMU_PID=$!
 
