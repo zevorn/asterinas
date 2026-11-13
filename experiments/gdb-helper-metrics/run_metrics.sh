@@ -111,7 +111,7 @@ main() {
     fi
 
     echo "[metrics] Kernel ELF: $elf"
-    timeout 900 rust-gdb --batch \
+    timeout 300 rust-gdb --batch \
         --command="$SCRIPT_DIR/collect.gdb" \
         "$elf" > "$OUTPUT_DIR/gdb.log" 2>&1 || true
 

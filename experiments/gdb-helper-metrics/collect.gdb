@@ -6,10 +6,10 @@ source scripts/gdb/asterinas-gdb.py
 
 set pagination off
 set confirm off
-set print elements 100
+set print elements 50
 set print repeats 3
 set print pretty off
-set print max-depth 20
+set print max-depth 10
 set max-value-size unlimited
 
 target remote .osdk-gdb-socket

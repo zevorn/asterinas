@@ -5,10 +5,12 @@ import gdb
 CASES = [
     ("pid_table_raw", "p aster_core::process::pid_table::PID_TABLE", True),
     ("pid_table_helper", "p aster_core::process::pid_table::PID_TABLE", False),
-    ("process_raw", "p *$ast_process(1)", True),
-    ("process_helper", "p *$ast_process(1)", False),
-    ("thread_raw", "p *$ast_thread(1)", True),
-    ("thread_helper", "p *$ast_thread(1)", False),
+    ("process_pid_raw", "p $ast_process(1)->pid", True),
+    ("process_pid_helper", "p $ast_process(1)->pid", False),
+    ("process_status_raw", "p (*$ast_process(1)).status", True),
+    ("process_status_helper", "p (*$ast_process(1)).status", False),
+    ("parent_pid_raw", "p (*$ast_process(1)).parent.pid", True),
+    ("parent_pid_helper", "p (*$ast_process(1)).parent.pid", False),
     ("tasks_raw", "p (*$ast_process(1)).tasks", True),
     ("tasks_helper", "p (*$ast_process(1)).tasks", False),
     ("name_raw", "p (*$ast_thread(1)).name", True),
@@ -17,8 +19,6 @@ CASES = [
     ("is_exited_helper", "p (*$ast_thread(1)).is_exited", False),
     ("timer_slack_raw", "p (*$ast_thread(1)).timer_slack_ns", True),
     ("timer_slack_helper", "p (*$ast_thread(1)).timer_slack_ns", False),
-    ("file_table_raw", "p *$ast_file_table(1)", True),
-    ("file_table_helper", "p *$ast_file_table(1)", False),
     ("files_raw", "p (*$ast_file_table(1)).table", True),
     ("files_helper", "p (*$ast_file_table(1)).table", False),
     ("elapsed_raw", "p ostd::timer::jiffies::ELAPSED", True),
@@ -45,6 +45,7 @@ def _set_asterinas_printers(enabled):
 
 
 def _emit(name, command):
+    gdb.write(f"\n[collect] {name}\n")
     gdb.write(f"\n@@@BEGIN {name}\n")
     try:
         output = gdb.execute(command, to_string=True)

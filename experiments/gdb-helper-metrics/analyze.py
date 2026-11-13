@@ -17,13 +17,13 @@ ENCODING = tiktoken.get_encoding("o200k_base")
 
 PAIRS = [
     ("pid_table", "pid_table_raw", "pid_table_helper"),
-    ("process", "process_raw", "process_helper"),
-    ("thread", "thread_raw", "thread_helper"),
+    ("process_pid", "process_pid_raw", "process_pid_helper"),
+    ("process_status", "process_status_raw", "process_status_helper"),
+    ("parent_pid", "parent_pid_raw", "parent_pid_helper"),
     ("tasks", "tasks_raw", "tasks_helper"),
     ("thread_name", "name_raw", "name_helper"),
     ("is_exited", "is_exited_raw", "is_exited_helper"),
     ("timer_slack", "timer_slack_raw", "timer_slack_helper"),
-    ("file_table", "file_table_raw", "file_table_helper"),
     ("file_slots", "files_raw", "files_helper"),
     ("elapsed", "elapsed_raw", "elapsed_helper"),
 ]
@@ -59,7 +59,14 @@ TASKS = [
             "Report the PID, PPID, state, thread count, and name of PID 1. "
             "Use only the GDB output below."
         ),
-        "raw_cases": ["pid_table_raw", "process_raw", "tasks_raw"],
+        "raw_cases": [
+            "pid_table_raw",
+            "process_pid_raw",
+            "process_status_raw",
+            "parent_pid_raw",
+            "tasks_raw",
+            "name_raw",
+        ],
         "helper_cases": ["ast_ps"],
     },
     {
@@ -68,7 +75,7 @@ TASKS = [
             "List every live thread with its TID, owning PID, and name. "
             "Use only the GDB output below."
         ),
-        "raw_cases": ["pid_table_raw", "thread_raw", "tasks_raw"],
+        "raw_cases": ["pid_table_raw", "tasks_raw", "name_raw"],
         "helper_cases": ["ast_threads"],
     },
     {
@@ -77,7 +84,7 @@ TASKS = [
             "List the file descriptors of PID 1 with their flags and object types. "
             "Use only the GDB output below."
         ),
-        "raw_cases": ["file_table_raw", "files_raw"],
+        "raw_cases": ["files_raw"],
         "helper_cases": ["ast_fds"],
     },
     {
@@ -96,7 +103,7 @@ TASKS = [
             "For TID 1, report the thread name, whether the thread has exited, "
             "and the timer slack in nanoseconds. Use only the GDB output below."
         ),
-        "raw_cases": ["thread_raw", "name_raw", "is_exited_raw", "timer_slack_raw"],
+        "raw_cases": ["name_raw", "is_exited_raw", "timer_slack_raw"],
         "helper_cases": ["name_helper", "is_exited_helper", "timer_slack_helper"],
     },
     {
@@ -105,7 +112,12 @@ TASKS = [
             "Show the process tree with each PID, its parent PID, and its state. "
             "Use only the GDB output below."
         ),
-        "raw_cases": ["pid_table_raw", "process_raw", "tasks_raw"],
+        "raw_cases": [
+            "pid_table_raw",
+            "process_pid_raw",
+            "process_status_raw",
+            "parent_pid_raw",
+        ],
         "helper_cases": ["ast_pstree"],
     },
 ]
