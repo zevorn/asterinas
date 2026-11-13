@@ -2,11 +2,6 @@
 
 import gdb
 
-POSIX_THREAD = (
-    "*(aster_core::process::posix_thread::PosixThread *)"
-    "(*$ast_thread(1)).data.pointer"
-)
-
 CASES = [
     ("pid_table_raw", "p aster_core::process::pid_table::PID_TABLE", True),
     ("pid_table_helper", "p aster_core::process::pid_table::PID_TABLE", False),
@@ -18,12 +13,12 @@ CASES = [
     ("parent_pid_helper", "p (*$ast_process(1)).parent.pid", False),
     ("tasks_raw", "p (*$ast_process(1)).tasks", True),
     ("tasks_helper", "p (*$ast_process(1)).tasks", False),
-    ("name_raw", f"p ({POSIX_THREAD}).name", True),
-    ("name_helper", f"p ({POSIX_THREAD}).name", False),
+    ("name_raw", "p $ast_metrics_pt.name", True),
+    ("name_helper", "p $ast_metrics_pt.name", False),
     ("is_exited_raw", "p (*$ast_thread(1)).is_exited", True),
     ("is_exited_helper", "p (*$ast_thread(1)).is_exited", False),
-    ("timer_slack_raw", f"p ({POSIX_THREAD}).timer_slack_ns", True),
-    ("timer_slack_helper", f"p ({POSIX_THREAD}).timer_slack_ns", False),
+    ("timer_slack_raw", "p $ast_metrics_pt.timer_slack_ns", True),
+    ("timer_slack_helper", "p $ast_metrics_pt.timer_slack_ns", False),
     ("files_raw", "p (*$ast_file_table(1)).table", True),
     ("files_helper", "p (*$ast_file_table(1)).table", False),
     ("elapsed_raw", "p ostd::timer::jiffies::ELAPSED", True),
@@ -82,7 +77,19 @@ def _emit(name, command):
     gdb.write(f"@@@END {name}\n")
 
 
+def _prepare_posix_thread():
+    thread = gdb.parse_and_eval("$ast_thread(1)")
+    boxed_data = thread.dereference()["data"]
+    pointer = boxed_data["pointer"]
+    posix_type = gdb.lookup_type(
+        "aster_core::process::posix_thread::PosixThread"
+    )
+    posix_thread = pointer.cast(posix_type.pointer()).dereference()
+    gdb.set_convenience_variable("ast_metrics_pt", posix_thread)
+
+
 def run():
+    _prepare_posix_thread()
     for name, command, raw in CASES:
         _set_asterinas_printers(not raw)
         _emit(name, command)
