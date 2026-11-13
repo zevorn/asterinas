@@ -5,8 +5,8 @@ import gdb
 CASES = [
     ("pid_table_raw", "p aster_core::process::pid_table::PID_TABLE", True),
     ("pid_table_helper", "p aster_core::process::pid_table::PID_TABLE", False),
-    ("process_pid_raw", "p $ast_process(1)->pid", True),
-    ("process_pid_helper", "p $ast_process(1)->pid", False),
+    ("process_pid_raw", "p (*$ast_process(1)).pid", True),
+    ("process_pid_helper", "p (*$ast_process(1)).pid", False),
     ("process_status_raw", "p (*$ast_process(1)).status", True),
     ("process_status_helper", "p (*$ast_process(1)).status", False),
     ("parent_pid_raw", "p (*$ast_process(1)).parent.pid", True),
