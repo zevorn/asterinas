@@ -2,6 +2,11 @@
 
 import gdb
 
+POSIX_THREAD = (
+    "*(aster_core::process::posix_thread::PosixThread *)"
+    "(*$ast_thread(1)).data.pointer"
+)
+
 CASES = [
     ("pid_table_raw", "p aster_core::process::pid_table::PID_TABLE", True),
     ("pid_table_helper", "p aster_core::process::pid_table::PID_TABLE", False),
@@ -13,16 +18,17 @@ CASES = [
     ("parent_pid_helper", "p (*$ast_process(1)).parent.pid", False),
     ("tasks_raw", "p (*$ast_process(1)).tasks", True),
     ("tasks_helper", "p (*$ast_process(1)).tasks", False),
-    ("name_raw", "p (*$ast_thread(1)).name", True),
-    ("name_helper", "p (*$ast_thread(1)).name", False),
+    ("name_raw", f"p ({POSIX_THREAD}).name", True),
+    ("name_helper", f"p ({POSIX_THREAD}).name", False),
     ("is_exited_raw", "p (*$ast_thread(1)).is_exited", True),
     ("is_exited_helper", "p (*$ast_thread(1)).is_exited", False),
-    ("timer_slack_raw", "p (*$ast_thread(1)).timer_slack_ns", True),
-    ("timer_slack_helper", "p (*$ast_thread(1)).timer_slack_ns", False),
+    ("timer_slack_raw", f"p ({POSIX_THREAD}).timer_slack_ns", True),
+    ("timer_slack_helper", f"p ({POSIX_THREAD}).timer_slack_ns", False),
     ("files_raw", "p (*$ast_file_table(1)).table", True),
     ("files_helper", "p (*$ast_file_table(1)).table", False),
     ("elapsed_raw", "p ostd::timer::jiffies::ELAPSED", True),
     ("elapsed_helper", "p ostd::timer::jiffies::ELAPSED", False),
+    ("printers", "info pretty-printer", False),
     ("ast_ps", "ast-ps", False),
     ("ast_threads", "ast-threads", False),
     ("ast_pstree", "ast-pstree", False),
@@ -31,17 +37,36 @@ CASES = [
     ("info_threads", "info threads", False),
 ]
 
+_disabled_printers = []
+
+
+def _printer_scopes():
+    scopes = []
+    for scope in (gdb.current_objfile(), gdb.current_progspace()):
+        if scope is not None and scope not in scopes:
+            scopes.append(scope)
+    return scopes
+
 
 def _set_asterinas_printers(enabled):
-    command = (
-        "enable pretty-printer global asterinas"
-        if enabled
-        else "disable pretty-printer global asterinas"
-    )
-    try:
-        gdb.execute(command, to_string=True)
-    except gdb.error:
-        pass
+    if enabled:
+        for scope, printer in _disabled_printers:
+            printers = list(getattr(scope, "pretty_printers", []) or [])
+            if printer not in printers:
+                printers.append(printer)
+            scope.pretty_printers = printers
+        _disabled_printers.clear()
+        return
+
+    for scope in _printer_scopes():
+        printers = list(getattr(scope, "pretty_printers", []) or [])
+        kept = []
+        for printer in printers:
+            if getattr(printer, "name", None) == "asterinas":
+                _disabled_printers.append((scope, printer))
+            else:
+                kept.append(printer)
+        scope.pretty_printers = kept
 
 
 def _emit(name, command):
