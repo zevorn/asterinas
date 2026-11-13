@@ -18,7 +18,7 @@ hbreak __ostd_main
 continue
 delete
 
-hbreak aster_core::syscall::handle_syscall
+break aster_core::syscall::handle_syscall
 continue
 delete
 

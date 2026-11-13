@@ -116,6 +116,8 @@ main() {
     if [ ! -s "$OUTPUT_DIR/gdb.log" ]; then
         die "GDB produced no output"
     fi
+    cp "$PROJECT_ROOT/qemu.log" "$OUTPUT_DIR/qemu.log" 2>/dev/null || true
+    cp "$PROJECT_ROOT/qemu-serial.log" "$OUTPUT_DIR/qemu-serial.log" 2>/dev/null || true
     echo "[metrics] Wrote $OUTPUT_DIR/gdb.log"
 }
 
